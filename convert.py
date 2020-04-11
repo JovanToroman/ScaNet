@@ -1,6 +1,12 @@
 import os
 from shutil import copyfile
+
+import numpy as np
 from PIL import Image
+from scipy import misc
+import tensorflow.compat.v1 as tf
+from sklearn.datasets import load_sample_image
+from sklearn.feature_extraction import image
 
 path=r'C:\Users\Jovan\Downloads\Manuscript_1587_Panagiotopoulou.jpg'
 path2=r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\sams_a3 - Copy'
@@ -32,4 +38,13 @@ def resize(path, dimensions):
          # The saved downsized image size is 24.8kb
         # foo.save("path\\to\\save\\image_scaled_opt.jpg",optimize=True,quality=95)
 
-resize(r'C:\Users\Jovan\Documents\Master_rad\DPED\dped\test\training_data\canon', (100,100))
+
+def extract_patches(path, patch_dims):
+    width, height = patch_dims
+    for index, f in enumerate(os.listdir(path)):
+        one_image = misc.imread(os.path.join(path, f))
+        patches = image.extract_patches_2d(one_image, (width, height), max_patches=100, random_state=100)
+        for index2, patch in enumerate(patches):
+            misc.imsave(os.path.join(path, "patches",  str(index * len(patches) + index2) + ".jpg"), patch)
+
+extract_patches(r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\sams_a3_cropped - Copy', [100,100])
