@@ -1,17 +1,15 @@
 import os
 from shutil import copyfile
 
-import numpy as np
 from PIL import Image
 from scipy import misc
-import tensorflow.compat.v1 as tf
-from sklearn.datasets import load_sample_image
 from sklearn.feature_extraction import image
 
-path=r'C:\Users\Jovan\Downloads\Manuscript_1587_Panagiotopoulou.jpg'
-path2=r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\sams_a3 - Copy'
-path3=r'C:\Users\Jovan\Documents\Master_rad\DPED\dped\test\training_data\canon'
-path4=r'C:\Users\Jovan\Documents\Master_rad\DPED\dped\test\training_data\test'
+from image_align import align_image
+
+path=r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\originals - Copy'
+path2=r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\sams_a3_cropped - Copy'
+path3=r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\aligned'
 
 
 def rename_multiple(path, path_to):
@@ -47,4 +45,13 @@ def extract_patches(path, patch_dims):
         for index2, patch in enumerate(patches):
             misc.imsave(os.path.join(path, "patches",  str(index * len(patches) + index2) + ".jpg"), patch)
 
-extract_patches(r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\sams_a3_cropped - Copy', [100,100])
+def align_images(path_originals, path_scanned, output_path):
+    originals = [o for o in os.listdir(path_originals)]
+    scanned = [s for s in os.listdir(path_scanned)]
+    for i in range(min(len(originals), len(scanned))):
+        align_image(os.path.join(path_originals, originals[i]), os.path.join(path_scanned, scanned[i]),
+                    os.path.join(output_path, str(i) + ".jpg"))
+
+
+extract_patches(r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\originals - Copy', [100,100])
+# align_images(path, path2, path3)
