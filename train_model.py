@@ -168,7 +168,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
                                         feed_dict={phone_: phone_images, dslr_: dslr_images, adv_: swaps})
         train_acc_discrim += accuracy_temp / eval_step
 
-        if i % eval_step == 0:
+        if i != 0 and i % eval_step == 0:
 
             # test generator and discriminator CNNs
 
