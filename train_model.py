@@ -108,7 +108,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
     # final loss
 
-    loss_generator = w_content * loss_content + w_texture * loss_texture + w_color * loss_color + w_tv * loss_tv
+    loss_generator = w_tv * loss_tv
 
     # psnr loss
 
