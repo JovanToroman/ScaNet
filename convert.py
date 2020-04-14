@@ -39,19 +39,18 @@ def resize(path, dimensions):
 def check_if_image_is_white(image):
     img = Image.fromarray(image).convert('L')
     pixels = img.getdata()  # get the pixels as a flattened sequence
-    white_thresh = 143
+    white_thresh = 130
     n_white = 0
     for pixel in pixels:
         if pixel > white_thresh:
             n_white += 1
     n = len(pixels)
 
-    return (n_white / float(n)) > 0.8
+    return (n_white / float(n)) > 0.95
 
 def extract_patches(path, path2, patch_dims):
     try:
         count = 0
-        patch_dims
         for index, f in enumerate(sorted(os.listdir(path))):
             one_image = misc.imread(os.path.join(path, f))
             two_image = misc.imread(os.path.join(path2, f))
@@ -59,8 +58,8 @@ def extract_patches(path, path2, patch_dims):
             patches2 = image.extract_patches_2d(two_image, patch_dims, 100, 100)
             for index2, patch in enumerate(patches):
                 if not check_if_image_is_white(patch):
-                    misc.imsave(os.path.join(path, "patches1",  str(int(f.split('.')[0]) * index2) + '.jpg'), patch)
-                    misc.imsave(os.path.join(path2, "patches1", str(int(f.split('.')[0]) * index2) + '.jpg'), patches2[index2])
+                    misc.imsave(os.path.join(path, "patches1",  str(count) + '.jpg'), patch)
+                    misc.imsave(os.path.join(path2, "patches1", str(count) + '.jpg'), patches2[index2])
                     count += 1
     except Exception as e:
         return
