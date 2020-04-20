@@ -12,6 +12,8 @@ import models
 import utils
 import vgg
 
+np.seterr('raise')
+
 # defining size of the training image patches
 
 PATCH_WIDTH = 100
@@ -106,9 +108,15 @@ with tf.Graph().as_default(), tf.Session() as sess:
     x_tv = tf2.nn.l2_loss(enhanced[:,:,1:,:] - enhanced[:,:,:batch_shape[1]-1,:])
     loss_tv = 2 * (x_tv/tv_x_size + y_tv/tv_y_size) / batch_size
 
+    ssim = tf.abs(tf.reduce_sum(tf.image.ssim(dslr_image, enhanced, 1.0)))
+    l2_loss = tf2.nn.l2_loss(dslr_gray - enhanced_gray)
+    # tf.enable_eager_execution()
+    # ssim_f = tf.py_function(MultiScaleSSIM, [dslr_image, enhanced], tf.float32)
+    # ssim_loss2 = ssim_f(dslr_image, enhanced)
+
     # final loss
 
-    loss_generator = w_tv * loss_tv
+    loss_generator = 3 / ssim + loss_tv
 
     # psnr loss
 
