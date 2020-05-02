@@ -2,8 +2,8 @@ from __future__ import print_function
 import cv2
 import numpy as np
 
-MAX_FEATURES = 5000
-GOOD_MATCH_PERCENT = 0.1
+MAX_FEATURES = 10000
+GOOD_MATCH_PERCENT = 0.01
 
 
 def alignImages(im1, im2):
