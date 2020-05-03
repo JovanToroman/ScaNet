@@ -48,7 +48,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
     # placeholders for training data
 
     phone_ = tf.placeholder(tf.float32, [None, PATCH_SIZE])
-    phone_image = tf.reshape(phone_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])
+    phone_image = tf.image.adjust_contrast(tf.image.per_image_standardization(tf.reshape(phone_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])), 0.5)
 
     dslr_ = tf.placeholder(tf.float32, [None, PATCH_SIZE])
     dslr_image = tf.reshape(dslr_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])
@@ -116,7 +116,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
     # final loss
 
-    loss_generator = 3 / ssim + loss_tv
+    loss_generator = 1 / ssim + loss_tv
 
     # psnr loss
 
