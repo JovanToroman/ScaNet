@@ -6,6 +6,7 @@ from scipy import misc
 from sklearn.feature_extraction import image
 
 from image_align import align_image
+from scan import detect_paper
 
 path=r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\a'
 path2=r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\b'
@@ -81,12 +82,17 @@ def align_images(path_originals, path_scanned, output_path):
         align_image(os.path.join(path_originals, originals[i]), os.path.join(path_scanned, scanned[i]),
                     os.path.join(output_path, originals[i].split('.')[0] + ".jpg"))
 
+def extract_sheets_of_paper(path_originals, path_transformed):
+    [detect_paper(os.path.join(path_originals, o), os.path.join(path_transformed, o))
+     for o in os.listdir(path_originals) if not o.startswith('.')]
+
 
 # extract_patches(r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\originals - Copy', [100,100])
 # extract_patches(r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\aligned_good',
 #                 r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\originals - Copy', [100,100])
-# align_images(path, path2, path3)
-# duplicate_originals(r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\originals', r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\originals_mock', 8)
-# rename(r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\aligned_good_high_res')
-extract_patches(r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\aligned_good_high_res',
-                r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\originals_mock', [100,100])
+# align_images(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals',
+#              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_s10e\high_lighting',
+#              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_s10e\high_lighting_aligned')
+# rename(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals')
+extract_sheets_of_paper(r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_tatin\high_lighting',
+             r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_tatin\high_lighting_processed')
