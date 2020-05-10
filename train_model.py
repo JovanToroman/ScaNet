@@ -73,10 +73,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
     loss_tv = 2 * (x_tv/tv_x_size + y_tv/tv_y_size) / batch_size
 
     ssim = tf.abs(tf.reduce_sum(tf.image.ssim(dslr_image, enhanced, 1.0)))
-    l2_loss = tf2.nn.l2_loss(dslr_gray - enhanced_gray)
-    # tf.enable_eager_execution()
-    # ssim_f = tf.py_function(MultiScaleSSIM, [dslr_image, enhanced], tf.float32)
-    # ssim_loss2 = ssim_f(dslr_image, enhanced)
+    # l2_loss = tf2.nn.l2_loss(dslr_gray - enhanced_gray) not used (gives green outputs)
 
     # final loss
 
