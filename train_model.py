@@ -48,7 +48,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
     # placeholders for training data
 
     phone_ = tf.placeholder(tf.float32, [None, PATCH_SIZE])
-    phone_image = tf.reshape(phone_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])
+    phone_image = tf.image.adjust_contrast(tf.image.per_image_standardization(tf.reshape(phone_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])), 0.5)
 
     dslr_ = tf.placeholder(tf.float32, [None, PATCH_SIZE])
     dslr_image = tf.reshape(dslr_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])
@@ -80,7 +80,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
     # final loss
 
-    loss_generator = 3 / ssim + loss_tv
+    loss_generator = 1 / ssim + loss_tv
 
     generator_vars = [v for v in tf.global_variables() if v.name.startswith("generator")]
     train_step_gen = tf.train.AdamOptimizer(learning_rate).minimize(loss_generator, var_list=generator_vars)
