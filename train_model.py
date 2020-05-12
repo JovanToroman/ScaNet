@@ -48,7 +48,8 @@ with tf.Graph().as_default(), tf.Session() as sess:
     # placeholders for training data
 
     phone_ = tf.placeholder(tf.float32, [None, PATCH_SIZE])
-    phone_image = tf.image.adjust_contrast(tf.image.per_image_standardization(tf.reshape(phone_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])), 0.5)
+    # phone_image = tf.image.adjust_contrast(tf.image.per_image_standardization(tf.reshape(phone_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])), 0.5)
+    phone_image = tf.reshape(phone_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])
 
     dslr_ = tf.placeholder(tf.float32, [None, PATCH_SIZE])
     dslr_image = tf.reshape(dslr_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])
@@ -57,11 +58,6 @@ with tf.Graph().as_default(), tf.Session() as sess:
     # get processed enhanced image
 
     enhanced = models.resnet(phone_image)
-
-    # transform both dslr and enhanced images to grayscale
-
-    enhanced_gray = tf.reshape(tf.image.rgb_to_grayscale(enhanced), [-1, PATCH_WIDTH * PATCH_HEIGHT])
-    dslr_gray = tf.reshape(tf.image.rgb_to_grayscale(dslr_image),[-1, PATCH_WIDTH * PATCH_HEIGHT])
 
     # push randomly the enhanced or dslr image to an adversarial CNN-discriminator
 
@@ -89,9 +85,6 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
     print('Training network')
 
-    train_loss_gen = 0.0
-    train_acc_discrim = 0.0
-
     all_zeros = np.reshape(np.zeros((batch_size, 1)), [batch_size, 1])
     test_crops = test_data[np.random.randint(0, TEST_SIZE, 5), :]
 
@@ -109,7 +102,6 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
         [loss_temp, temp] = sess.run([loss_generator, train_step_gen],
                                         feed_dict={phone_: phone_images, dslr_: dslr_images})
-        train_loss_gen += loss_temp / eval_step
 
         # train discriminator
 
@@ -133,9 +125,6 @@ with tf.Graph().as_default(), tf.Session() as sess:
                 before_after = np.hstack((np.reshape(test_crops[idx], [PATCH_HEIGHT, PATCH_WIDTH, 3]), crop))
                 misc.imsave('results/' + str(phone)+ "_" + str(idx) + '_iteration_' + str(i) + '.jpg', before_after)
                 idx += 1
-
-            train_loss_gen = 0.0
-            train_acc_discrim = 0.0
 
             # save the model that corresponds to the current iteration
 

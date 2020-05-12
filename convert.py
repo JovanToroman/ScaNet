@@ -2,7 +2,7 @@ import os
 from shutil import copyfile
 
 from PIL import Image
-from scipy import misc
+import imageio as io
 from sklearn.feature_extraction import image
 
 from image_align import align_image
@@ -63,14 +63,14 @@ def extract_patches(path_scanned, path_originals, patch_dims):
     try:
         count = 0
         for index, f in enumerate(sorted(os.listdir(path_scanned))):
-            one_image = misc.imread(os.path.join(path_scanned, f))
-            two_image = misc.imread(os.path.join(path_originals, f))
+            one_image = io.imread(os.path.join(path_scanned, f))
+            two_image = io.imread(os.path.join(path_originals, f))
             patches = image.extract_patches_2d(one_image, patch_dims, 100, 100)
             patches2 = image.extract_patches_2d(two_image, patch_dims, 100, 100)
             for index2, patch in enumerate(patches):
                 if not (check_if_image_is_white(patch) or check_if_image_is_white(patches2[index2])):
-                    misc.imsave(os.path.join(path_scanned, "patches1", str(count) + '.jpg'), patch)
-                    misc.imsave(os.path.join(path_originals, "patches1", str(count) + '.jpg'), patches2[index2])
+                    io.imsave(os.path.join(path_scanned, "patches", str(count) + '.jpg'), patch)
+                    io.imsave(os.path.join(path_originals, "patches", str(count) + '.jpg'), patches2[index2])
                     count += 1
     except Exception as e:
         return
@@ -87,12 +87,13 @@ def extract_sheets_of_paper(path_originals, path_transformed):
      for o in os.listdir(path_originals) if not o.startswith('.')]
 
 
-# extract_patches(r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\originals - Copy', [100,100])
-# extract_patches(r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\aligned_good',
-#                 r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\originals - Copy', [100,100])
-# align_images(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals',
-#              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_s10e\high_lighting',
-#              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_s10e\high_lighting_aligned')
+
+extract_patches(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals - Copy',
+                r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_s10e\high_lighting_aligned', [100,100])
+# align_images(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals - Copy - Copy',
+#              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_s10e\high_lighting_processed - Copy (2)',
+#              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_s10e\high_lighting_aligned2')
 # rename(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals')
-extract_sheets_of_paper(r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_tatin\high_lighting',
-             r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_tatin\high_lighting_processed')
+# extract_sheets_of_paper(r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_tatin\high_lighting',
+#              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_tatin\high_lighting_processed')
+# resize(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals - Copy', [1080, 1528])
