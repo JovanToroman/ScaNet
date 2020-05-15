@@ -74,7 +74,7 @@ with tf.compat.v1.Session(config=config) as sess:
         num_saved_models = int(len([f for f in os.listdir("models/") if f.startswith(phone + "_iteration")]) / 2)
 
         if iteration == "all":
-            iteration = np.arange(1, num_saved_models + 1) * 10
+            iteration = np.arange(1, num_saved_models + 1) * 200
         else:
             iteration = [int(iteration)]
 
