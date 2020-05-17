@@ -74,7 +74,7 @@ with tf.compat.v1.Session(config=config) as sess:
         num_saved_models = int(len([f for f in os.listdir("models/") if f.startswith(phone + "_iteration")]) / 2)
 
         if iteration == "all":
-            iteration = np.arange(1, num_saved_models + 1) * 10
+            iteration = [100]
         else:
             iteration = [int(iteration)]
 
@@ -90,10 +90,8 @@ with tf.compat.v1.Session(config=config) as sess:
 
                 print("iteration " + str(i) + ", processing image " + photo)
                 image = np.float16(misc.imresize(misc.imread(test_dir + photo), res_sizes[phone])) / 255
-                original_image = np.float16(misc.imresize(misc.imread(originals_dir + photo), res_sizes[phone])) / 255
 
                 image_crop = utils.extract_crop(image, resolution, phone, res_sizes)
-                original_image_crop = utils.extract_crop(original_image, resolution, phone, res_sizes)
                 image_crop_2d = np.reshape(image_crop, [1, IMAGE_SIZE])
 
                 # get enhanced image
@@ -107,5 +105,4 @@ with tf.compat.v1.Session(config=config) as sess:
                 # save the results as .png images
 
                 misc.imsave("visual_results/" + phone + "_" + str(photo_name) + "_iteration_" + str(i) + "_enhanced.png", enhanced_image)
-                misc.imsave("visual_results/" + phone + "_" + str(photo_name) + "_iteration_" + str(i) + "_original.png", original_image)
                 misc.imsave("visual_results/" + phone + "_" + str(photo_name) + "_iteration_" + str(i) + "_before_after.png", before_after)

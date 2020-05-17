@@ -59,21 +59,13 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
     enhanced = models.resnet(phone_image)
 
-    # push randomly the enhanced or dslr image to an adversarial CNN-discriminator
-
-    batch_shape = (batch_size, PATCH_WIDTH, PATCH_HEIGHT, 3)
-    tv_y_size = utils._tensor_size(enhanced[:,1:,:,:])
-    tv_x_size = utils._tensor_size(enhanced[:,:,1:,:])
-    y_tv = tf2.nn.l2_loss(enhanced[:,1:,:,:] - enhanced[:,:batch_shape[2]-1,:,:])
-    x_tv = tf2.nn.l2_loss(enhanced[:,:,1:,:] - enhanced[:,:,:batch_shape[1]-1,:])
-    loss_tv = 2 * (x_tv/tv_x_size + y_tv/tv_y_size) / batch_size
 
     ssim = tf.abs(tf.reduce_sum(tf.image.ssim(dslr_image, enhanced, 1.0)))
     # l2_loss = tf2.nn.l2_loss(dslr_gray - enhanced_gray) not used (gives green outputs)
 
     # final loss
 
-    loss_generator = 1 / ssim + loss_tv
+    loss_generator = 1 / ssim
 
     generator_vars = [v for v in tf.global_variables() if v.name.startswith("generator")]
     train_step_gen = tf.train.AdamOptimizer(learning_rate).minimize(loss_generator, var_list=generator_vars)
