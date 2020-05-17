@@ -29,7 +29,7 @@ def resnet(input_image):
         c6 = tf.nn.relu(_instance_norm(conv2d(c5, W6) + b6))
 
         W7 = weight_variable([1, 1, 64, 64], name="W7"); b7 = bias_variable([64], name="b7");
-        c7 = tf.nn.relu(_instance_norm(conv2d(c6, W7) + b7)) + c1
+        c7 = tf.nn.relu(_instance_norm(conv2d(c6, W7) + b7)) + c5
 
         W8 = weight_variable([1, 1, 64, 64], name="W8"); b8 = bias_variable([64], name="b8");
         c8 = tf.nn.relu(_instance_norm(conv2d(c7, W8) + b8))
