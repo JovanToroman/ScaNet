@@ -4,13 +4,13 @@ import os
 import numpy as np
 import sys
 
-def load_test_data(phone, dped_dir, IMAGE_SIZE):
+def load_test_data(phone, dped_dir, IMAGE_SIZE, test_size):
 
     test_directory_phone = dped_dir + str(phone) + '/test_data/patches/' + str(phone) + '/'
     test_directory_dslr = dped_dir + str(phone) + '/test_data/patches/canon/'
 
     NUM_TEST_IMAGES = len([name for name in os.listdir(test_directory_phone)
-                           if os.path.isfile(os.path.join(test_directory_phone, name))])
+                           if os.path.isfile(os.path.join(test_directory_phone, name))]) if not test_size else test_size
 
     test_data = np.zeros((NUM_TEST_IMAGES, IMAGE_SIZE))
     test_answ = np.zeros((NUM_TEST_IMAGES, IMAGE_SIZE))

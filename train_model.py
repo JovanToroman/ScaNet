@@ -31,7 +31,7 @@ np.random.seed(0)
 # loading training and test data
 
 print("Loading test data...")
-test_data, test_answ = load_test_data(phone, dped_dir, PATCH_SIZE)
+test_data, test_answ = load_test_data(phone, dped_dir, PATCH_SIZE, 200)
 print("Test data was loaded\n")
 
 print("Loading training data...")
