@@ -50,6 +50,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
     phone_ = tf.placeholder(tf.float32, [None, PATCH_SIZE])
     # phone_image = tf.image.adjust_contrast(tf.image.per_image_standardization(tf.reshape(phone_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])), 0.5)
     phone_image = tf.reshape(phone_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])
+    phone_image2 = tf.reshape(phone_, [-1, 256, 256, 3])
 
     dslr_ = tf.placeholder(tf.float32, [None, PATCH_SIZE])
     dslr_image = tf.reshape(dslr_, [-1, PATCH_HEIGHT, PATCH_WIDTH, 3])
@@ -57,15 +58,22 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
     # get processed enhanced image
 
-    enhanced = models.resnet(phone_image)
+    enhanced = models.unet(tf.image.rgb_to_grayscale(phone_image))
+
+    # enhanced_gray = tf.image.rgb_to_grayscale(enhanced)
+    # dslr_gray = tf.image.rgb_to_grayscale(dslr_image)
+    # enhanced_gray2 = tf.reshape(tf.image.rgb_to_grayscale(enhanced), [-1, PATCH_WIDTH * PATCH_HEIGHT])
+    # dslr_gray2 = tf.reshape(tf.image.rgb_to_grayscale(dslr_image), [-1, PATCH_WIDTH * PATCH_HEIGHT])
 
 
     ssim = tf.abs(tf.reduce_sum(tf.image.ssim(dslr_image, enhanced, 1.0)))
-    # l2_loss = tf2.nn.l2_loss(dslr_gray - enhanced_gray) not used (gives green outputs)
+    # pixel_difference = tf.abs(tf.reduce_mean(tf.reshape(dslr_gray2, [-1])) - tf.reduce_mean(tf.reshape(enhanced_gray2, [-1])))
+    #l2_loss = tf2.nn.l2_loss(dslr_image - enhanced) #not used (gives green outputs)
+    # psnr = tf.abs(tf2.image.psnr(enhanced_gray, dslr_gray, max_val=1.0))
 
     # final loss
 
-    loss_generator = 1/ssim + pixel_difference
+    loss_generator = 1/ssim
 
     generator_vars = [v for v in tf.global_variables() if v.name.startswith("generator")]
     train_step_gen = tf.train.AdamOptimizer(learning_rate).minimize(loss_generator, var_list=generator_vars)
