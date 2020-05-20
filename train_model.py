@@ -31,7 +31,7 @@ np.random.seed(0)
 # loading training and test data
 
 print("Loading test data...")
-test_data, test_answ = load_test_data(phone, dped_dir, PATCH_SIZE)
+test_data, test_answ = load_test_data(phone, dped_dir, PATCH_SIZE, 200)
 print("Test data was loaded\n")
 
 print("Loading training data...")
@@ -65,7 +65,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
     # final loss
 
-    loss_generator = 1 / ssim
+    loss_generator = 1/ssim + pixel_difference
 
     generator_vars = [v for v in tf.global_variables() if v.name.startswith("generator")]
     train_step_gen = tf.train.AdamOptimizer(learning_rate).minimize(loss_generator, var_list=generator_vars)
@@ -124,7 +124,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
             # reload a different batch of training data
 
-            del train_data
-            del train_answ
-            train_data, train_answ = load_batch(phone, dped_dir, train_size, PATCH_SIZE)
+            # del train_data
+            # del train_answ
+            # train_data, train_answ = load_batch(phone, dped_dir, train_size, PATCH_SIZE)
         print("finised iteration no. {}".format(i))
