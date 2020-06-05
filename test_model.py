@@ -36,9 +36,9 @@ with tf.compat.v1.Session(config=config) as sess:
     test_photos = [f for f in os.listdir(test_dir) if os.path.isfile(test_dir + f)]
     original_photos = [f for f in os.listdir(originals_dir) if os.path.isfile(originals_dir + f)]
 
-    if test_subset == "small":
-        # use five first images only
-        test_photos = test_photos[0:5]
+    # if test_subset == "small":
+    #     # use five first images only
+    #     test_photos = test_photos[0:5]
 
     if phone.endswith("_orig"):
 
@@ -74,7 +74,7 @@ with tf.compat.v1.Session(config=config) as sess:
         num_saved_models = int(len([f for f in os.listdir("models/") if f.startswith(phone + "_iteration")]) / 2)
 
         if iteration == "all":
-            iteration = np.arange(1,num_saved_models + 1) * 200
+            iteration = [900,2900,9500]
         else:
             iteration = [int(iteration)]
 
@@ -106,4 +106,4 @@ with tf.compat.v1.Session(config=config) as sess:
 
                 # misc.imsave("visual_results/" + phone + "_" + str(photo_name) + "_iteration_" + str(i) + "_enhanced.png", enhanced_image)
                 misc.imsave("visual_results/" + phone + "_" + str(photo_name)
-                            + "_iteration_" + str(i) + "_before_after.png", before_after)
+                            + "_iteration_" + str(i) + "_before_after_final.png", before_after)

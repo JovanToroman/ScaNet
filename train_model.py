@@ -78,7 +78,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
     generator_vars = [v for v in tf.global_variables() if v.name.startswith("generator")]
     train_step_gen = tf.train.AdamOptimizer(learning_rate).minimize(loss_generator, var_list=generator_vars)
 
-    saver = tf.train.Saver()
+    saver = tf.train.Saver(max_to_keep=None)
 
     print('Initializing variables')
     sess.run(tf.global_variables_initializer())
