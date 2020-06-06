@@ -124,7 +124,4 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
             # reload a different batch of training data
 
-            del train_data
-            del train_answ
-            train_data, train_answ = load_batch(phone, dped_dir, train_size, PATCH_SIZE)
         print("finised iteration no. {}".format(i))
