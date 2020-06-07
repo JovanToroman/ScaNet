@@ -7,10 +7,8 @@ import numpy as np
 import sys
 
 from load_dataset import load_test_data, load_batch
-from ssim import MultiScaleSSIM
 import models
 import utils
-import vgg
 
 np.seterr('raise')
 
@@ -59,6 +57,7 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
     enhanced = models.resnet(phone_image)
 
+    # ssim loss
 
     ssim = tf.abs(tf.reduce_sum(tf.image.ssim(dslr_image, enhanced, 1.0)))
     # l2_loss = tf2.nn.l2_loss(dslr_gray - enhanced_gray) not used (gives green outputs)
@@ -95,16 +94,6 @@ with tf.Graph().as_default(), tf.Session() as sess:
         [loss_temp, temp] = sess.run([loss_generator, train_step_gen],
                                         feed_dict={phone_: phone_images, dslr_: dslr_images})
 
-        # train discriminator
-
-        idx_train = np.random.randint(0, train_size, batch_size)
-
-        # generate image swaps (dslr or enhanced) for discriminator
-        swaps = np.reshape(np.random.randint(0, 2, batch_size), [batch_size, 1])
-
-        size_originals = len(train_answ)
-        phone_images = train_data[idx_train]
-        dslr_images = train_answ[idx_train]
 
         if i != 0 and i % eval_step == 0:
 
