@@ -4,6 +4,7 @@ from shutil import copyfile
 from PIL import Image
 import imageio as io
 from sklearn.feature_extraction import image
+import skimage
 
 from image_align import align_image
 from scan import detect_paper
@@ -86,10 +87,20 @@ def extract_sheets_of_paper(path_originals, path_transformed):
     [detect_paper(os.path.join(path_originals, o), os.path.join(path_transformed, o))
      for o in os.listdir(path_originals) if not o.startswith('.')]
 
+def gaussian_blur(path_to_clear_images):
+    """Edits images in-place to add gaussian noise to them"""
+    try:
+        count = 0
+        for index, f in enumerate(sorted(os.listdir(path_to_clear_images))):
+            clear_image = io.imread(os.path.join(path_to_clear_images, f))
+            blurred_image = skimage.util.random_noise(clear_image, mode='gaussian')
+            io.imsave(os.path.join(path_to_clear_images, f), blurred_image)
+    except Exception as _e:
+        return
 
 
-extract_patches(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals - Copy',
-                r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_s10e\high_lighting_aligned', [100,100])
+extract_patches('testim',
+                'origim', [512,512])
 # align_images(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals - Copy - Copy',
 #              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_s10e\high_lighting_processed - Copy (2)',
 #              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_s10e\high_lighting_aligned2')
@@ -97,3 +108,4 @@ extract_patches(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals - Copy',
 # extract_sheets_of_paper(r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_tatin\high_lighting',
 #              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_tatin\high_lighting_processed')
 # resize(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals - Copy', [1080, 1528])
+# gaussian_blur('/opt/workspace/host_storage_hdd/projects/dped_copy/dped/test/test_data/full_size_test_images')

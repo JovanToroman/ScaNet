@@ -17,11 +17,11 @@ def load_test_data(phone, dped_dir, IMAGE_SIZE, test_size):
 
     for i in range(0, NUM_TEST_IMAGES):
         
-        I = np.asarray(misc.imread(test_directory_phone + str(i) + '.jpg'))
+        I = np.asarray(misc.imread(test_directory_phone + str(i + 32986) + '.jpg'))
         I = np.float16(np.reshape(I, [1, IMAGE_SIZE]))/255
         test_data[i, :] = I
         
-        I = np.asarray(misc.imread(test_directory_dslr + str(i) + '.jpg'))
+        I = np.asarray(misc.imread(test_directory_dslr + str(i + 32986) + '.jpg'))
         I = np.float16(np.reshape(I, [1, IMAGE_SIZE]))/255
         test_answ[i, :] = I
 
@@ -53,11 +53,11 @@ def load_batch(phone, dped_dir, TRAIN_SIZE, IMAGE_SIZE):
     i = 0
     for img in TRAIN_IMAGES:
 
-        I = np.asarray(misc.imread(train_directory_phone + str(img) + '.jpg'))
+        I = np.asarray(misc.imread(train_directory_phone + str(img + 47942) + '.jpg'))
         I = np.float16(np.reshape(I, [1, IMAGE_SIZE])) / 255
         train_data[i, :] = I
 
-        I = np.asarray(misc.imread(train_directory_dslr + str(img) + '.jpg'))
+        I = np.asarray(misc.imread(train_directory_dslr + str(img + 47942) + '.jpg'))
         I = np.float16(np.reshape(I, [1, IMAGE_SIZE])) / 255
         train_answ[i, :] = I
 

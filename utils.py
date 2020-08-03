@@ -35,7 +35,7 @@ def process_command_args(arguments):
 
     batch_size = 50
     train_size = 30000
-    learning_rate = 5e-4
+    learning_rate = 5e-5
     num_train_iters = 20000
 
     w_content = 10
@@ -176,6 +176,7 @@ def get_resolutions():
     res_sizes["small"] = [768, 1024]
     res_sizes["tiny"] = [600, 800]
     res_sizes["test"] = [600,800]
+    res_sizes["test_orig"] = [600, 800]
 
     return res_sizes
 

@@ -29,7 +29,7 @@ np.random.seed(0)
 # loading training and test data
 
 print("Loading test data...")
-test_data, test_answ = load_test_data(phone, dped_dir, PATCH_SIZE, 200)
+test_data, test_answ = load_test_data(phone, dped_dir, PATCH_SIZE, 28)
 print("Test data was loaded\n")
 
 print("Loading training data...")
@@ -60,16 +60,20 @@ with tf.Graph().as_default(), tf.Session() as sess:
     # ssim loss
 
     ssim = tf.abs(tf.reduce_sum(tf.image.ssim(dslr_image, enhanced, 1.0)))
-    # l2_loss = tf2.nn.l2_loss(dslr_gray - enhanced_gray) not used (gives green outputs)
+    # l2_loss = tf2.nn.l2_loss(dslr_image - enhanced) #not used (gives green outputs)
+    loss_mse = tf.reduce_mean(tf.square(enhanced - dslr_image)) # MSE
 
     # final loss
 
-    loss_generator = 1 / ssim
+    loss_generator = 20*loss_mse + 1/ssim
 
-    generator_vars = [v for v in tf.global_variables() if v.name.startswith("generator")]
-    train_step_gen = tf.train.AdamOptimizer(learning_rate).minimize(loss_generator, var_list=generator_vars)
+    generator_vars = [v for v in tf.global_variables() if v.name.startswith("autoencoder")]
+    train_step_gen = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss_generator, var_list=generator_vars)
+
+    # tf.reset_default_graph()
 
     saver = tf.train.Saver(max_to_keep=None)
+    # saver.restore(sess, 'models/test_iteration_5000.ckpt')
 
     print('Initializing variables')
     sess.run(tf.global_variables_initializer())
@@ -82,6 +86,8 @@ with tf.Graph().as_default(), tf.Session() as sess:
     logs = open('models/' + phone + '.txt', "w+")
     logs.close()
 
+    train_loss_gen = 0.0
+
     for i in range(num_train_iters):
 
         # train generator
@@ -93,6 +99,10 @@ with tf.Graph().as_default(), tf.Session() as sess:
 
         [loss_temp, temp] = sess.run([loss_generator, train_step_gen],
                                         feed_dict={phone_: phone_images, dslr_: dslr_images})
+
+        # train_loss_gen += loss_temp / eval_step
+
+        print("Train loss at iteration {} is {}".format(i, loss_temp))
 
 
         if i != 0 and i % eval_step == 0:

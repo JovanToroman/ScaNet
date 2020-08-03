@@ -3,7 +3,7 @@
 from scipy import misc
 import numpy as np
 import tensorflow as tf
-from models import resnet
+import models
 import utils
 import os
 import sys
@@ -27,7 +27,7 @@ x_ = tf.compat.v1.placeholder(tf.compat.v1.float32, [None, IMAGE_SIZE])
 x_image = tf.reshape(x_, [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 3])
 
 # generate enhanced image
-enhanced = resnet(x_image)
+enhanced = models.resnet(x_image)
 
 with tf.compat.v1.Session(config=config) as sess:
 
@@ -36,9 +36,9 @@ with tf.compat.v1.Session(config=config) as sess:
     test_photos = [f for f in os.listdir(test_dir) if os.path.isfile(test_dir + f)]
     original_photos = [f for f in os.listdir(originals_dir) if os.path.isfile(originals_dir + f)]
 
-    if test_subset == "small":
-        # use five first images only
-        test_photos = test_photos[0:5]
+    # if test_subset == "small":
+    #     # use five first images only
+    #     test_photos = test_photos[0:5]
 
     if phone.endswith("_orig"):
 
@@ -104,5 +104,5 @@ with tf.compat.v1.Session(config=config) as sess:
 
                 # save the results as .png images
 
-                misc.imsave("visual_results/" + phone + "_" + str(photo_name) + "_iteration_" + str(i) + "_enhanced.png", enhanced_image)
+                # misc.imsave("visual_results/" + phone + "_" + str(photo_name) + "_iteration_" + str(i) + "_enhanced.png", enhanced_image)
                 misc.imsave("visual_results/" + phone + "_" + str(photo_name) + "_iteration_" + str(i) + "_before_after.png", before_after)
