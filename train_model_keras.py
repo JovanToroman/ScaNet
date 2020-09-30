@@ -184,7 +184,7 @@ def trainGenerator(batch_size, train_path, image_folder, groundtruth_folder, ima
         yield (img, groundtruth)
 
 
-def testGenerator(test_path,num_image = 40):
+def testGenerator(test_path):
     for dir in [d for d in os.listdir(test_path) if os.path.isdir(os.path.join(test_path, d))]:
         for i in os.listdir(os.path.join(test_path, dir)):
             img = misc.imread(os.path.join(test_path,dir, i))
@@ -194,7 +194,7 @@ def testGenerator(test_path,num_image = 40):
             # img = extract_crop(img, [1356, 2048], [600, 800])
             img = img.astype('float32') / 255
             img = img[np.newaxis, ...] # add first dimension 1 to nparray
-            image_name = '{}_{}_{}'.format(i.split('_')[0], dir, i.split('_')[1])
+            image_name = '{}_{}_{}'.format(i.split('_', maxsplit=1)[0], dir, i.split('_', maxsplit=1)[1])
             yield (img, image_name)
 
 
@@ -229,13 +229,13 @@ def saveResult(save_path, results, inputs):
 train = 1
 
 if train == 1:
-    myGene = trainGenerator(64, 'dped/test/training_data', 'test1', 'original1', save_to_dir=None)
+    myGene = trainGenerator(256, 'dped/test/training_data', 'test1', 'original1', save_to_dir=None)
     model = unet()
-    # model.load_weights('keras_weights.hdf5')
+    model.load_weights('konacni_trening_0.5dropout_7_0.11381993442773819_0.8621912598609924.hdf5')
     model_checkpoint = ModelCheckpoint(
-        'konacni_trening_0.5dropout_{epoch}_{loss}_{accuracy}.hdf5', monitor='loss', verbose=1, save_best_only=True)
-    history = model.fit_generator(myGene, steps_per_epoch=18122
-                        , epochs=5, callbacks=[model_checkpoint])
+        'konacni_trening_0.5dropout_7+{epoch}_{loss}_{accuracy}.hdf5', monitor='loss', verbose=1, save_best_only=True)
+    history = model.fit_generator(myGene, steps_per_epoch=4531
+                        , epochs=3, callbacks=[model_checkpoint])
     # x1,x2,y1,y2 = pyplot.axis()
     # pyplot.axis([0, 4, 0, 1])
     # pyplot.plot(history.history['loss'])
@@ -245,19 +245,19 @@ if train == 1:
 else:
     results = []
     count = 0
-    num_to_evaluate = 10
+    num_to_evaluate = -1
     while(num_to_evaluate == -1 or count < num_to_evaluate):
-        testGene = testGenerator("dped/test/test_data/full_size_test_images", num_image=150)
+        testGene = testGenerator("dped/test/test_data/full_size_test_images")
         for i in range(len(results)):
             try: next(testGene)
             except: break
         try: img, image_name = next(testGene)
-        except Exception as e: print("Exception: " + str(e))
+        except: break
         model = unet(input_size=img[0].shape)
-        model.load_weights('keras_weights_radeci_model_sa_sigmoidkom_3.hdf5')
+        model.load_weights('konacni_trening_0.5dropout_6_0.11812031269073486_0.8558241128921509.hdf5')
         predict_one = model.predict(img)
         results.append((image_name, predict_one))
         count += 1
         print("{} done!".format(count))
-    testGene = testGenerator("dped/test/test_data/full_size_test_images", num_image=23)
+    testGene = testGenerator("dped/test/test_data/full_size_test_images")
     saveResult("results", results, testGene)
