@@ -11,6 +11,7 @@ import cv2
 from image_align import align_image
 from scan import detect_paper
 from db import insert_into_db, check_if_image_exists
+from utils import concat_images
 
 path=r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\a'
 path2=r'C:\Users\Jovan\Documents\Master_rad\testni_zajem\b'
@@ -76,10 +77,13 @@ def extract_patches(root_path_scanned, scanned_folders, path_originals, patch_di
                 patches = image.extract_patches_2d(one_image, patch_dims, patches_per_image, 100)
                 patches2 = image.extract_patches_2d(two_image, patch_dims, patches_per_image, 100)
                 for index2, patch in enumerate(patches):
-                    if not (check_if_image_is_white(patch) or check_if_image_is_white(patches2[index2])):
-                        io.imsave(os.path.join('dped/test/training_data/test', str(count) + '.jpg'), patch)
-                        io.imsave(os.path.join('dped/test/training_data/original', str(count) + '.jpg'), patches2[index2])
-                        count += 1
+                    ## do not discard all white or black images because we don't want our data to be biased
+                    # if not (check_if_image_is_white(patch) or check_if_image_is_white(patches2[index2])):
+                    io.imsave(os.path.join('dped/test/training_data/test1', str(count) + '.jpg'), patch)
+                    io.imsave(os.path.join('dped/test/training_data/original1', str(count) + '.jpg'), patches2[index2])
+                    count += 1
+                    if count % 1000 == 0:
+                        print(count)
     except Exception as e:
         print(e)
         return
@@ -122,6 +126,15 @@ def separate_test_data(input_path, output_path_test, test_ratio=0.01):
             os.rename(os.path.join(input_path, file), os.path.join(output_path_test, file))
         count += 1
 
+def concat_items(images_path, capture_folder, manual_contrast_folder, our_method_folder, groundtruth_folder, output_folder):
+    for im in os.listdir(os.path.join(images_path, capture_folder)):
+        captured_image = Image.open(os.path.join(images_path, capture_folder, im))
+        manual_contrast_image = Image.open(os.path.join(images_path, manual_contrast_folder, im))
+        our_method_image = Image.open(os.path.join(images_path, our_method_folder, im))
+        groundtruth_image = Image.open(os.path.join(images_path, groundtruth_folder, im))
+        concat_images([captured_image, manual_contrast_image, our_method_image, groundtruth_image],
+                      os.path.join(images_path, output_folder, im))
+
 
 
 phones = ['HTC', 'LG_G3', 'Motorola', 'Samsung_A3', 'Samsung_S20', 'Sony_Xperia']
@@ -143,10 +156,28 @@ phones = ['HTC', 'LG_G3', 'Motorola', 'Samsung_A3', 'Samsung_S20', 'Sony_Xperia'
 
 
 extract_patches('../captured_images/aligned', phones, 'origim',
-                (100,100), 40)
+                (128,128), 100)
 
-# rename(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals')
+# rename('dped/test/test_data/full_size_test_images')
 # extract_sheets_of_paper(r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_tatin\high_lighting',
 #              r'C:\Users\Jovan\Documents\Master_rad\zajem\samsung_tatin\high_lighting_processed')
 # resize(r'C:\Users\Jovan\Documents\Master_rad\zajem\originals - Copy', [1080, 1528])
 # gaussian_blur('/opt/workspace/host_storage_hdd/projects/dped_copy/dped/test/test_data/full_size_test_images')
+
+
+## just temp code for small amount of test patches ---> delete after
+# count = 0
+# for index, f in enumerate(sorted(os.listdir('../captured_images/aligned/test'))):
+#     if not os.path.isdir(os.path.join('../captured_images/aligned/test', f)):
+#         original_image_name = f.split('_')[0] + '.jpg'
+#         one_image = io.imread(os.path.join('../captured_images/aligned/test', f))
+#         two_image = io.imread(os.path.join('origim', original_image_name))
+#         if two_image.shape != one_image.shape:
+#             two_image = cv2.resize(two_image, (one_image.shape[1], one_image.shape[0])).astype('uint8')
+#         patches = image.extract_patches_2d(one_image, (100,100), 1000, 100)
+#         patches2 = image.extract_patches_2d(two_image, (100,100), 1000, 100)
+#         for index2, patch in enumerate(patches):
+#             if not (check_if_image_is_white(patch) or check_if_image_is_white(patches2[index2])):
+#                 io.imsave(os.path.join('../captured_images/aligned/test/patches/test', str(count) + '.jpg'), patch)
+#                 io.imsave(os.path.join('../captured_images/aligned/test/patches/original', str(count) + '.jpg'), patches2[index2])
+#                 count += 1
