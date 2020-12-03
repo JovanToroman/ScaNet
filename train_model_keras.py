@@ -13,7 +13,7 @@ import keras_contrib as kc
 from PIL import Image
 from matplotlib import pyplot
 
-from utils import concat_images
+from utils import concat_images, resize_image_if_uneven_width_or_height
 
 
 def extract_crop(image, resolution_from, resolution_to):
@@ -50,12 +50,12 @@ def unet(input_size = (128,128,3)):
     pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
     conv4 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool3)
     conv4 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv4)
-    drop4 = Dropout(0.50)(conv4)
+    drop4 = Dropout(0.9)(conv4)
     pool4 = MaxPooling2D(pool_size=(2, 2))(drop4)
 
     conv5 = Conv2D(1024, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool4)
     conv5 = Conv2D(1024, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv5)
-    drop5 = Dropout(0.50)(conv5)
+    drop5 = Dropout(0.9)(conv5)
 
     up6 = Conv2D(512, 2, activation='relu', padding='same', kernel_initializer='he_normal')(
         UpSampling2D(size=(2, 2))(drop5))
@@ -91,10 +91,10 @@ def unet(input_size = (128,128,3)):
 
 
 
-def resnet_keras(input_size = (100,100,3)):
+def resnet_keras(input_size = (128,128,3)):
     inputs = Input(input_size)
 
-    c1 = conv2d(inputs, 64, 3)
+    c1 = conv2d(inputs, 64, 9)
 
     # residual 1
 
@@ -129,7 +129,7 @@ def resnet_keras(input_size = (100,100,3)):
 
     # Final
 
-    enhanced = conv2d(c11, 3, 1)
+    enhanced = conv2d(c11, 3, 9, activation='sigmoid')
 
     model = Model(inputs=inputs, outputs=enhanced)
 
@@ -187,14 +187,17 @@ def trainGenerator(batch_size, train_path, image_folder, groundtruth_folder, ima
 def testGenerator(test_path):
     for dir in [d for d in os.listdir(test_path) if os.path.isdir(os.path.join(test_path, d))]:
         for i in os.listdir(os.path.join(test_path, dir)):
-            img = misc.imread(os.path.join(test_path,dir, i))
+            ##img = misc.imread(os.path.join(test_path, dir, i))
+            img = resize_image_if_uneven_width_or_height(misc.imread(os.path.join(test_path,dir, i))) # For uneven images
+            # img = misc.imread(os.path.join(test_path,dir, i)) # for even images
             # img = trans.resize(img,target_size)
             # img = (img * 255).astype('uint8')
             # img = np.reshape(img,img.shape+(3,)) if (not flag_multi_class) else img
             # img = extract_crop(img, [1356, 2048], [600, 800])
             img = img.astype('float32') / 255
             img = img[np.newaxis, ...] # add first dimension 1 to nparray
-            image_name = '{}_{}_{}'.format(i.split('_', maxsplit=1)[0], dir, i.split('_', maxsplit=1)[1])
+            image_name=i # For differently named images -
+            ##image_name = '{}_{}_{}'.format(i.split('_', maxsplit=1)[0], dir, i.split('_', maxsplit=1)[1])
             yield (img, image_name)
 
 
@@ -215,13 +218,15 @@ def saveResult(save_path, results, inputs):
     count = 0
     for item in results:
         image_name, img = item
-        original_image_name = image_name.split('_')[0] + '.jpg'
+        original_image_name = image_name.split('_')[0] + '.png'
+        ##original_image_name = image_name.split('_')[0] + '.jpg'
         # item = (item * 255).astype('uint8')
         processed_image = Image.fromarray((img[0]*255).astype('uint8'))
-        original_image = Image.open(os.path.join('origim', original_image_name))
+        original_image = Image.open(os.path.join('disjoint/originals', original_image_name))
+        ##original_image = Image.open(os.path.join('origim', original_image_name))
         input_image = Image.fromarray((next(inputs)[0][0]*255).astype('uint8'))
         concat_images([input_image, processed_image, original_image], os.path.join(save_path, image_name))
-        # misc.imsave(os.path.join(save_path, image_name),img[0])
+        ##misc.imsave(os.path.join(save_path, image_name),processed_image)
         # misc.imsave(os.path.join(save_path, image_name), )
         count += 1
 
@@ -231,17 +236,11 @@ train = 1
 if train == 1:
     myGene = trainGenerator(256, 'dped/test/training_data', 'test1', 'original1', save_to_dir=None)
     model = unet()
-    model.load_weights('konacni_trening_0.5dropout_7_0.11381993442773819_0.8621912598609924.hdf5')
+    # model.load_weights('saved_models/Resnet_konacni_trening_2_0.330391526222229_0.7298755049705505.hdf5')
     model_checkpoint = ModelCheckpoint(
-        'konacni_trening_0.5dropout_7+{epoch}_{loss}_{accuracy}.hdf5', monitor='loss', verbose=1, save_best_only=True)
-    history = model.fit_generator(myGene, steps_per_epoch=4531
-                        , epochs=3, callbacks=[model_checkpoint])
-    # x1,x2,y1,y2 = pyplot.axis()
-    # pyplot.axis([0, 4, 0, 1])
-    # pyplot.plot(history.history['loss'])
-    # pyplot.plot(history.history['accuracy'])
-    # pyplot.legend(['loss','accuracy'], loc='upper left')
-    # pyplot.show()
+        'saved_models/dropouts/unet_full_dropout_{epoch}_{loss}.hdf5', monitor='loss', verbose=1, save_best_only=True)
+    history = model.fit_generator(myGene, steps_per_epoch=1000
+                        , epochs=50, callbacks=[model_checkpoint])
 else:
     results = []
     count = 0
@@ -253,8 +252,8 @@ else:
             except: break
         try: img, image_name = next(testGene)
         except: break
-        model = unet(input_size=img[0].shape)
-        model.load_weights('konacni_trening_0.5dropout_6_0.11812031269073486_0.8558241128921509.hdf5')
+        model = resnet_keras(input_size=img[0].shape)
+        model.load_weights('saved_models/Resnet_konacni_trening_16_0.219255730509758_0.7756176590919495_lr_1e-4.hdf5')
         predict_one = model.predict(img)
         results.append((image_name, predict_one))
         count += 1

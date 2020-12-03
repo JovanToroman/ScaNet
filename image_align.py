@@ -5,6 +5,8 @@ import tensorflow as tf
 
 import os
 
+from utils import calc_mse
+
 # this is stage 2 in the processing pipeline
 # status 0 - success; status 1 - no alignment; status 2 - bad alignment (insufficient ssim)
 
@@ -81,12 +83,13 @@ def align_image(original_path, scanned_path, output_path):
 
     ssim = float(tf.image.ssim(tf.convert_to_tensor(imReference), tf.convert_to_tensor(imReg), 1.0))
     print('Ssim for image {} is {}'.format(output_path, ssim))
+    mse = calc_mse(imReference, imReg)
 
     # Write aligned image to disk.
     # print("Saving aligned image : ", output_path);
     if ssim > 0.1: # if ssim < some threshold then image was not properly aligned
-        cv2.imwrite(output_path, imReg)
-        return (0, ssim)
+        cv2.imwrite(output_path.split('.')[0] + '_' + str(mse) + '_' + str(ssim) + '_' + '.' + output_path.split('.')[1], imReg)
+        return (0, ssim, mse)
     else:
         print('Bad alignment of image {}'.format(output_path))
         return (2, ssim)
