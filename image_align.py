@@ -1,9 +1,17 @@
 from __future__ import print_function
 import cv2
 import numpy as np
+import tensorflow as tf
+
+import os
+
+from utils import calc_mse
+
+# this is stage 2 in the processing pipeline
+# status 0 - success; status 1 - no alignment; status 2 - bad alignment (insufficient ssim)
 
 MAX_FEATURES = 10000
-GOOD_MATCH_PERCENT = 0.01
+GOOD_MATCH_PERCENT = 0.05
 
 
 def alignImages(im1, im2):
@@ -29,8 +37,8 @@ def alignImages(im1, im2):
         matches = matches[:numGoodMatches]
 
         # Draw top matches
-        imMatches = cv2.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
-        cv2.imwrite("matches.jpg", imMatches)
+        # imMatches = cv2.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
+        # cv2.imwrite("matches.jpg", imMatches)
 
         # Extract location of good matches
         points1 = np.zeros((len(matches), 2), dtype=np.float32)
@@ -53,8 +61,11 @@ def alignImages(im1, im2):
 
 
 def align_image(original_path, scanned_path, output_path):
+    if os.path.exists(output_path):
+        return
+
     # Read reference image
-    # print("Reading reference image : ", original_path)
+    print("Reading reference image : ", original_path)
     imReference = cv2.imread(original_path, cv2.IMREAD_COLOR)
 
     # Read image to be aligned
@@ -68,10 +79,20 @@ def align_image(original_path, scanned_path, output_path):
 
     if len(imReg) == 0:
         print("Failed alignment for {}".format(scanned_path))
-        return
+        return (1, None)
+
+    ssim = float(tf.image.ssim(tf.convert_to_tensor(imReference), tf.convert_to_tensor(imReg), 1.0))
+    print('Ssim for image {} is {}'.format(output_path, ssim))
+    mse = calc_mse(imReference, imReg)
+
     # Write aligned image to disk.
     # print("Saving aligned image : ", output_path);
-    cv2.imwrite(output_path, imReg)
+    if ssim > 0.1: # if ssim < some threshold then image was not properly aligned
+        cv2.imwrite(output_path.split('.')[0] + '_' + str(mse) + '_' + str(ssim) + '_' + '.' + output_path.split('.')[1], imReg)
+        return (0, ssim, mse)
+    else:
+        print('Bad alignment of image {}'.format(output_path))
+        return (2, ssim)
 
     # Print estimated homography
     # print("Estimated homography : \n", h)
